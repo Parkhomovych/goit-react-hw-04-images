@@ -14,23 +14,6 @@ export const App = () => {
   const [totalImg, setTotalImg] = useState(0);
   const [loader, setLoader] = useState(false);
 
-  useEffect(() => {
-    if (search === '' && currentPage === 1) return;
-    setLoader(true);
-
-    const response = async () => {
-      try {
-        const data = await fetchImg(search, currentPage);
-        setImages([...images, ...data.hits]);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoader(false);
-      }
-    };
-    response();
-  }, [currentPage]);
-
   const searchImage = async e => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -39,34 +22,34 @@ export const App = () => {
       toast('🟡 Write something!');
       return;
     }
-
-    try {
-      setImages([]);
-      setCurrentPage(1);
-      setLoader(true);
-      const response = await fetchImg(input.value, 1);
-      setImages(response.hits);
-      setTotalImg(response.totalHits);
-      setSearch(input.value);
-      if (response.totalHits > 0) {
-        toast('Good Job!', {
-          icon: '👏',
-        });
-      } else {
-        toast('🟠 There are no pictures');
-      }
-      input.placeholder = input.value;
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoader(false);
-      form.reset();
-    }
+    setImages([]);
+    setCurrentPage(1);
+    setSearch(input.value);
   };
 
   const moreImg = async () => {
     setCurrentPage(currentPage + 1);
   };
+  useEffect(() => {
+    const fisrImages = async () => {
+      if (search.trim() === '') return;
+      try {
+        setLoader(true);
+        const data = await fetchImg(search, currentPage);
+        if (data.totalHits === 0) {
+          toast('Not a valid value');
+          return;
+        }
+        setImages([...images, ...data.hits]);
+        setTotalImg(data.totalHits);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoader(false);
+      }
+    };
+    fisrImages();
+  }, [search, currentPage]);
   return (
     <div className="App">
       <SearchBar search={searchImage} />
