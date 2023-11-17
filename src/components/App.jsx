@@ -10,13 +10,26 @@ import { Button, Div } from './Loader/Loader';
 export const App = () => {
   const [images, setImages] = useState([]);
   const [search, setSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalImg, setTotalImg] = useState(0);
   const [loader, setLoader] = useState(false);
 
   useEffect(() => {
-    setCurrentPage(2);
-  }, [search]);
+    if (search === '' && currentPage === 1) return;
+    setLoader(true);
+
+    const response = async () => {
+      try {
+        const data = await fetchImg(search, currentPage);
+        setImages([...images, ...data.hits]);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoader(false);
+      }
+    };
+    response();
+  }, [currentPage]);
 
   const searchImage = async e => {
     e.preventDefault();
@@ -29,6 +42,7 @@ export const App = () => {
 
     try {
       setImages([]);
+      setCurrentPage(1);
       setLoader(true);
       const response = await fetchImg(input.value, 1);
       setImages(response.hits);
@@ -39,29 +53,19 @@ export const App = () => {
           icon: '👏',
         });
       } else {
-        toast('🟠 There are no pictures')
+        toast('🟠 There are no pictures');
       }
       input.placeholder = input.value;
     } catch (error) {
       console.log(error);
     } finally {
       setLoader(false);
-      setCurrentPage(currentPage + 1);
       form.reset();
     }
   };
 
   const moreImg = async () => {
     setCurrentPage(currentPage + 1);
-    setLoader(true);
-    try {
-      const response = await fetchImg(search, currentPage);
-      setImages([...images, ...response.hits]);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoader(false);
-    }
   };
   return (
     <div className="App">
