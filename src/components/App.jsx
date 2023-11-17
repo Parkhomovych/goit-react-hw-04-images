@@ -49,6 +49,7 @@ export const App = () => {
       }
     };
     fisrImages();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, currentPage]);
   return (
     <div className="App">
